@@ -13,30 +13,34 @@ public class ConsoleApplication {
     public static void main(String[] args) {
         // Отключаем запуск веб-сервера (Tomcat), так как это консольное приложение
         SpringApplication app = new SpringApplication(ConsoleApplication.class);
-        app.setWebApplicationType(org.springframework.boot.WebApplicationType.NONE);
+        //app.setWebApplicationType(org.springframework.boot.WebApplicationType.NONE);
         app.run(args);
     }
 
     @Bean
     public CommandLineRunner commandLineRunner(ArgumentService argumentService) {
         return args -> {
-            // Этот блок выполнится сразу после запуска Spring
-            System.out.println("Приложение запущено. Введите аргументы через пробел:");
+            System.out.println("Приложение запущено. Введите аргументы через пробел (или напишите 'exit' для выхода):");
 
-            Scanner scanner = new Scanner(System.in);
-            if (scanner.hasNextLine()) {
-                String input = scanner.nextLine();
-                // Разбиваем введенную строку на массив аргументов по пробелам
-                String[] inputArgs = input.trim().split("\\s+");
+            // Мы используем цикл, чтобы программа не закрывалась после первого ввода
+            try (Scanner scanner = new Scanner(System.in)) {
+                while (scanner.hasNextLine()) {
+                    String input = scanner.nextLine();
 
-                // Передаем аргументы в наш сервис
-                String result = argumentService.processArguments(inputArgs);
+                    if ("exit".equalsIgnoreCase(input.trim())) {
+                        break; // Выход из цикла, если ввели exit
+                    }
 
-                // Выводим результат обратно в консоль
-                System.out.println("\n--- Результат ---");
-                System.out.println(result);
+                    if (input.trim().isEmpty()) continue; // Пропускаем пустые строки
+
+                    String[] inputArgs = input.trim().split("\\s+");
+                    String result = argumentService.processArguments(inputArgs);
+
+                    System.out.println("\n--- Результат ---");
+                    System.out.println(result);
+                    System.out.println("Введите следующие аргументы:");
+                }
             }
-            scanner.close();
         };
     }
 }

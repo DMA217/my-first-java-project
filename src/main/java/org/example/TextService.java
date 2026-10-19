@@ -10,7 +10,7 @@ public class TextService {
     // 1. Удаление гласных
     public String removeVowels(String input) {
         if (input == null) return "";
-        return input.replaceAll("(?i)[aeiouаеёиоуыэюя]", "");
+        return input.replaceAll("(?i)[aeiouаеёиоуыэюя\\s]", "");
     }
 
     // 2. Подсчет согласных (английские и русские)
