@@ -3,6 +3,7 @@ package org.example;
 import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 @Service
 public class TextService {
@@ -10,7 +11,7 @@ public class TextService {
     // 1. Удаление гласных
     public String removeVowels(String input) {
         if (input == null) return "";
-        return input.replaceAll("(?i)[aeiouаеёиоуыэюя\\s]", "");
+        return input.replaceAll("(?i)[aeiouyаеёиоуыэюя\\s]", "");
     }
 
     // 2. Подсчет согласных (английские и русские)
@@ -28,7 +29,7 @@ public class TextService {
 
     // 3. Карта букв (буква -> количество)
     public Map<Character, Integer> getLetterCounts(String input) {
-        Map<Character, Integer> counts = new HashMap<>();
+        Map<Character, Integer> counts = new TreeMap<>();
         if (input == null) return counts;
 
         for (char c : input.toCharArray()) {
