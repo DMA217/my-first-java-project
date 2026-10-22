@@ -10,7 +10,7 @@ public class TextService {
 
     public String removeVowels(String input) {
         if (input == null) return "";
-        return input.replaceAll("(?i)[aeiouyAEIOUYаеёиоуыэюяАЕЁИОУЫЭЮЯ\\s]", "");
+        return input.replaceAll("(?iu)[aeiouyаеёиоуыэюя\\s]", "");
     }
 
     public int countConsonants(String input) {
