@@ -5,10 +5,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class ArgumentService {
 
-    /**
-     * Обрабатывает массив аргументов и возвращает отформатированную строку.
-     * В будущем здесь может быть сложная логика: сохранение в БД, фильтрация и т.д.
-     */
     public String processArguments(String[] args) {
         if (args == null || args.length == 0) {
             return "Аргументы не переданы.";

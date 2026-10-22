@@ -36,7 +36,6 @@
     const inputField = document.getElementById('textInput');
     const resultBox = document.getElementById('result');
 
-    // 1. Удаление гласных
     function removeVowels() {
         const text = inputField.value;
         fetch(`/remove-vowels?param=${encodeURIComponent(text)}`)
@@ -54,7 +53,6 @@
             });
     }
 
-    // 2. Подсчет согласных
     function countConsonants() {
         const text = inputField.value;
         fetch(`/count-consonants?param=${encodeURIComponent(text)}`)
@@ -72,7 +70,6 @@
             });
     }
 
-    // 3. Карта букв
     function letterMap() {
         const text = inputField.value;
         fetch(`/letter-map?param=${encodeURIComponent(text)}`)
@@ -81,7 +78,6 @@
                 return response.json();
             })
             .then(data => {
-                // Красиво форматируем JSON для вывода
                 resultBox.innerHTML = JSON.stringify(data, null, 2);
                 resultBox.classList.remove('error');
             })

@@ -8,13 +8,11 @@ import java.util.TreeMap;
 @Service
 public class TextService {
 
-    // 1. Удаление гласных
     public String removeVowels(String input) {
         if (input == null) return "";
         return input.replaceAll("(?i)[aeiouyаеёиоуыэюя\\s]", "");
     }
 
-    // 2. Подсчет согласных (английские и русские)
     public int countConsonants(String input) {
         if (input == null) return 0;
         String consonants = "bcdfghjklmnpqrstvwxyzбвгджзйклмнпрстфхцчшщ";
@@ -27,7 +25,6 @@ public class TextService {
         return count;
     }
 
-    // 3. Карта букв (буква -> количество)
     public Map<Character, Integer> getLetterCounts(String input) {
         Map<Character, Integer> counts = new TreeMap<>();
         if (input == null) return counts;

@@ -13,46 +13,39 @@ public class MyController {
     private final TextService textService;
     private final RequestLogRepository logRepository;
 
-    // Внедряем зависимости через конструктор
     public MyController(TextService textService, RequestLogRepository logRepository) {
         this.textService = textService;
         this.logRepository = logRepository;
     }
 
-    // 1. Удаление гласных и пробелов
     @GetMapping("/remove-vowels")
     public ResponseEntity<String> removeVowels(@RequestParam(value = "param", defaultValue = "") String param) {
         if (param.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Ошибка: параметр 'param' не может быть пустым.");
         }
 
-        // Сохраняем запрос в БД
         logRepository.save(new RequestLog("remove-vowels", param));
 
         return ResponseEntity.ok(textService.removeVowels(param));
     }
 
-    // 2. Подсчет согласных
     @GetMapping("/count-consonants")
     public ResponseEntity<?> countConsonants(@RequestParam(value = "param", defaultValue = "") String param) {
         if (param.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Ошибка: параметр 'param' не может быть пустым.");
         }
 
-        // Сохраняем запрос в БД
         logRepository.save(new RequestLog("count-consonants", param));
 
         return ResponseEntity.ok(textService.countConsonants(param));
     }
 
-    // 3. Карта букв (JSON)
     @GetMapping("/letter-map")
     public ResponseEntity<?> getLetterMap(@RequestParam(value = "param", defaultValue = "") String param) {
         if (param.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Ошибка: параметр 'param' не может быть пустым.");
         }
 
-        // Сохраняем запрос в БД
         logRepository.save(new RequestLog("letter-map", param));
 
         return ResponseEntity.ok(textService.getLetterCounts(param));

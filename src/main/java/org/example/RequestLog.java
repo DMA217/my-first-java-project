@@ -1,6 +1,6 @@
 package org.example;
 
-import jakarta.persistence.*; // Очень важно: именно jakarta, а не javax!
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,7 +23,6 @@ public class RequestLog {
         this.timestamp = LocalDateTime.now();
     }
 
-    // Геттеры и сеттеры (обязательно сгенерируйте их через Alt+Insert / Cmd+N)
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getEndpoint() { return endpoint; }
