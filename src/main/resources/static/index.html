@@ -2,17 +2,20 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Текстовый анализатор</title>
+    <title>Текстовый анализатор и Исключения</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background-color: #f4f4f9; }
-        h1 { color: #333; text-align: center; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        body { font-family: Arial, sans-serif; max-width: 650px; margin: 40px auto; padding: 20px; background-color: #f4f4f9; }
+        h1, h2 { color: #333; text-align: center; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
         input[type="text"] { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .buttons { display: flex; gap: 10px; margin-bottom: 20px; }
-        button { flex: 1; padding: 10px; border: none; border-radius: 4px; background-color: #e52b50; color: white; cursor: pointer; font-size: 14px; }
+        .buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        button { flex: 1 1 30%; padding: 10px; border: none; border-radius: 4px; background-color: #e52b50; color: white; cursor: pointer; font-size: 14px; }
         button:hover { background-color: #ae1e31; }
-        .result-box { background: #e9ecef; padding: 15px; border-radius: 4px; min-height: 50px; word-wrap: break-word; font-family: monospace; }
+        .btn-exception { background-color: #333; } /* Немного темнее для контраста с блоками исключений */
+        .btn-exception:hover { background-color: #111; }
+        .result-box { background: #e9ecef; padding: 15px; border-radius: 4px; min-height: 50px; word-wrap: break-word; font-family: monospace; white-space: pre-wrap; }
         .error { color: red; font-weight: bold; }
+        p.desc { text-align: center; color: #666; font-size: 14px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -32,9 +35,24 @@
     <div class="result-box" id="result">Здесь появится ответ...</div>
 </div>
 
+<div class="card">
+    <h2>Обработка исключений</h2>
+    <p class="desc">Нажмите на кнопку, чтобы вызвать ошибку на сервере. Благодаря <code>@RestControllerAdvice</code>, вы увидите статус и сообщение.</p>
+
+    <div class="buttons">
+        <button class="btn-exception" onclick="testCheckedException()">Checked (IOException)</button>
+        <button class="btn-exception" onclick="testUncheckedException()">Unchecked (RuntimeException)</button>
+        <button class="btn-exception" onclick="testLogException()">Log4j2 (FileNotFound)</button>
+    </div>
+
+    <div>Результат:</div>
+    <div class="result-box" id="exceptionResult">Здесь появится ответ...</div>
+</div>
+
 <script>
     const inputField = document.getElementById('textInput');
     const resultBox = document.getElementById('result');
+    const exceptionResultBox = document.getElementById('exceptionResult');
 
     function removeVowels() {
         const text = inputField.value;
@@ -85,6 +103,38 @@
                 resultBox.innerHTML = error.message;
                 resultBox.classList.add('error');
             });
+    }
+
+    function handleExceptionFetch(url) {
+        fetch(url)
+            .then(async response => {
+                const text = await response.text();
+                if (!response.ok) {
+                    // Если статус 400, 404 или 500
+                    throw new Error(`Статус ${response.status}: ${text}`);
+                }
+                return text;
+            })
+            .then(data => {
+                exceptionResultBox.innerHTML = `Успех:\n${data}`;
+                exceptionResultBox.classList.remove('error');
+            })
+            .catch(error => {
+                exceptionResultBox.innerHTML = `Поймана ошибка:\n${error.message}`;
+                exceptionResultBox.classList.add('error');
+            });
+    }
+
+    function testCheckedException() {
+        handleExceptionFetch('/exception/checked');
+    }
+
+    function testUncheckedException() {
+        handleExceptionFetch('/exception/unchecked');
+    }
+
+    function testLogException() {
+        handleExceptionFetch('/exception/log?text=TestFromHtml');
     }
 </script>
 
