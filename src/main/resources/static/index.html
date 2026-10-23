@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Текстовый анализатор и Исключения</title>
+    <title>Текстовый анализатор, Исключения и API</title>
     <style>
         body { font-family: Arial, sans-serif; max-width: 650px; margin: 40px auto; padding: 20px; background-color: #f4f4f9; }
         h1, h2 { color: #333; text-align: center; }
@@ -11,8 +11,10 @@
         .buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
         button { flex: 1 1 30%; padding: 10px; border: none; border-radius: 4px; background-color: #e52b50; color: white; cursor: pointer; font-size: 14px; }
         button:hover { background-color: #ae1e31; }
-        .btn-exception { background-color: #333; } /* Немного темнее для контраста с блоками исключений */
+        .btn-exception { background-color: #333; }
         .btn-exception:hover { background-color: #111; }
+        .btn-api { background-color: #007bff; }
+        .btn-api:hover { background-color: #0056b3; }
         .result-box { background: #e9ecef; padding: 15px; border-radius: 4px; min-height: 50px; word-wrap: break-word; font-family: monospace; white-space: pre-wrap; }
         .error { color: red; font-weight: bold; }
         p.desc { text-align: center; color: #666; font-size: 14px; margin-bottom: 15px; }
@@ -22,37 +24,49 @@
 
 <div class="card">
     <h1>Анализатор текста</h1>
-
     <input type="text" id="textInput" placeholder="Введите текст (например, How are you)..." />
-
     <div class="buttons">
         <button onclick="removeVowels()">Удалить гласные</button>
         <button onclick="countConsonants()">Согласные</button>
         <button onclick="letterMap()">Карта букв (JSON)</button>
     </div>
-
     <div>Результат:</div>
     <div class="result-box" id="result">Здесь появится ответ...</div>
 </div>
 
 <div class="card">
     <h2>Обработка исключений</h2>
-    <p class="desc">Нажмите на кнопку, чтобы вызвать ошибку на сервере. Благодаря <code>@RestControllerAdvice</code>, вы увидите статус и сообщение.</p>
-
+    <p class="desc">Вызовите ошибку, чтобы увидеть работу <code>@RestControllerAdvice</code>.</p>
     <div class="buttons">
         <button class="btn-exception" onclick="testCheckedException()">Checked (IOException)</button>
         <button class="btn-exception" onclick="testUncheckedException()">Unchecked (RuntimeException)</button>
         <button class="btn-exception" onclick="testLogException()">Log4j2 (FileNotFound)</button>
     </div>
-
     <div>Результат:</div>
     <div class="result-box" id="exceptionResult">Здесь появится ответ...</div>
+</div>
+
+<div class="card">
+    <h2>API с путем /api</h2>
+    <p class="desc">Демонстрация внедрения сервиса <code>ApiService</code> в контроллер.</p>
+
+    <input type="text" id="apiInput" placeholder="Введите имя или текст для обработки..." />
+
+    <div class="buttons">
+        <button class="btn-api" onclick="apiHello()">Приветствие (/api/hello)</button>
+        <button class="btn-api" onclick="apiReverse()">Перевернуть (/api/reverse)</button>
+    </div>
+
+    <div>Результат API:</div>
+    <div class="result-box" id="apiResult">Здесь появится ответ...</div>
 </div>
 
 <script>
     const inputField = document.getElementById('textInput');
     const resultBox = document.getElementById('result');
     const exceptionResultBox = document.getElementById('exceptionResult');
+    const apiInputField = document.getElementById('apiInput');
+    const apiResultBox = document.getElementById('apiResult');
 
     function removeVowels() {
         const text = inputField.value;
@@ -110,7 +124,6 @@
             .then(async response => {
                 const text = await response.text();
                 if (!response.ok) {
-                    // Если статус 400, 404 или 500
                     throw new Error(`Статус ${response.status}: ${text}`);
                 }
                 return text;
@@ -125,16 +138,41 @@
             });
     }
 
-    function testCheckedException() {
-        handleExceptionFetch('/exception/checked');
+    function testCheckedException() { handleExceptionFetch('/exception/checked'); }
+    function testUncheckedException() { handleExceptionFetch('/exception/unchecked'); }
+    function testLogException() { handleExceptionFetch('/exception/log?text=TestFromHtml'); }
+
+    function apiHello() {
+        const name = apiInputField.value || "Гость";
+        fetch(`/api/hello?name=${encodeURIComponent(name)}`)
+            .then(response => response.text())
+            .then(data => {
+                apiResultBox.innerHTML = data;
+                apiResultBox.classList.remove('error');
+            })
+            .catch(error => {
+                apiResultBox.innerHTML = error.message;
+                apiResultBox.classList.add('error');
+            });
     }
 
-    function testUncheckedException() {
-        handleExceptionFetch('/exception/unchecked');
-    }
-
-    function testLogException() {
-        handleExceptionFetch('/exception/log?text=TestFromHtml');
+    function apiReverse() {
+        const text = apiInputField.value;
+        if (!text) {
+            apiResultBox.innerHTML = "Введите текст для переворота!";
+            apiResultBox.classList.add('error');
+            return;
+        }
+        fetch(`/api/reverse?text=${encodeURIComponent(text)}`)
+            .then(response => response.text())
+            .then(data => {
+                apiResultBox.innerHTML = data;
+                apiResultBox.classList.remove('error');
+            })
+            .catch(error => {
+                apiResultBox.innerHTML = error.message;
+                apiResultBox.classList.add('error');
+            });
     }
 </script>
 
