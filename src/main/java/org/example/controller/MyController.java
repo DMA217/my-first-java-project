@@ -1,13 +1,14 @@
-package org.example;
+package org.example.controller;
 
+import org.example.service.ExceptionService;
+import org.example.entity.RequestLog;
+import org.example.repository.RequestLogRepository;
+import org.example.service.TextService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
-import java.util.Map;
-
-import java.util.Map;
 
 @RestController
 public class MyController {
