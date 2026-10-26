@@ -30,6 +30,8 @@ dependencies {
     implementation("io.swagger.core.v3:swagger-models:2.2.26")
     implementation("io.swagger.core.v3:swagger-annotations:2.2.26")
     implementation("io.github.kilmajster:ngrok-spring-boot-starter:0.9.2")
+    implementation("org.liquibase:liquibase-core")
+    runtimeOnly("org.postgresql:postgresql")
 }
 
 tasks.test {

@@ -15,7 +15,9 @@
         .btn-exception:hover { background-color: #111; }
         .btn-api { background-color: #007bff; }
         .btn-api:hover { background-color: #0056b3; }
-        .result-box { background: #e9ecef; padding: 15px; border-radius: 4px; min-height: 50px; word-wrap: break-word; font-family: monospace; white-space: pre-wrap; }
+        .btn-lib { background-color: #28a745; }
+        .btn-lib:hover { background-color: #218838; }
+        .result-box { background: #e9ecef; padding: 15px; border-radius: 4px; min-height: 50px; word-wrap: break-word; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
         .error { color: red; font-weight: bold; }
         p.desc { text-align: center; color: #666; font-size: 14px; margin-bottom: 15px; }
     </style>
@@ -49,16 +51,26 @@
 <div class="card">
     <h2>API с путем /api</h2>
     <p class="desc">Демонстрация внедрения сервиса <code>ApiService</code> в контроллер.</p>
-
     <input type="text" id="apiInput" placeholder="Введите имя или текст для обработки..." />
-
     <div class="buttons">
         <button class="btn-api" onclick="apiHello()">Приветствие (/api/hello)</button>
         <button class="btn-api" onclick="apiReverse()">Перевернуть (/api/reverse)</button>
     </div>
-
     <div>Результат API:</div>
     <div class="result-box" id="apiResult">Здесь появится ответ...</div>
+</div>
+
+<div class="card">
+    <h2>Библиотека (База Данных)</h2>
+    <p class="desc">Работа со связью Many-to-Many (Авторы и Книги).</p>
+
+    <div class="buttons">
+        <button class="btn-lib" onclick="addBook()">Добавить книгу в БД</button>
+        <button class="btn-lib" onclick="getAllBooks()">Показать все книги</button>
+    </div>
+
+    <div>Результат БД:</div>
+    <div class="result-box" id="libraryResult">Здесь появится ответ...</div>
 </div>
 
 <script>
@@ -67,6 +79,7 @@
     const exceptionResultBox = document.getElementById('exceptionResult');
     const apiInputField = document.getElementById('apiInput');
     const apiResultBox = document.getElementById('apiResult');
+    const libraryResultBox = document.getElementById('libraryResult');
 
     function removeVowels() {
         const text = inputField.value;
@@ -172,6 +185,36 @@
             .catch(error => {
                 apiResultBox.innerHTML = error.message;
                 apiResultBox.classList.add('error');
+            });
+    }
+
+    function addBook() {
+        fetch('/api/library/add')
+            .then(response => response.text())
+            .then(data => {
+                libraryResultBox.innerHTML = data;
+                libraryResultBox.classList.remove('error');
+            })
+            .catch(error => {
+                libraryResultBox.innerHTML = "Ошибка при добавлении: " + error.message;
+                libraryResultBox.classList.add('error');
+            });
+    }
+
+    function getAllBooks() {
+        fetch('/api/library/all')
+            .then(response => {
+                if (!response.ok) throw new Error("Ошибка при получении списка книг");
+                return response.json();
+            })
+            .then(data => {
+                // Красиво форматируем JSON
+                libraryResultBox.innerHTML = JSON.stringify(data, null, 2);
+                libraryResultBox.classList.remove('error');
+            })
+            .catch(error => {
+                libraryResultBox.innerHTML = error.message;
+                libraryResultBox.classList.add('error');
             });
     }
 </script>
