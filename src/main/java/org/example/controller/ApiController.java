@@ -38,14 +38,17 @@ public class ApiController {
     }
 
     @GetMapping("/library/add")
-    public String addBook() {
-        Author author = new Author("Джоан Роулинг");
-        Book book = new Book("Гарри Поттер и философский камень");
+    public String addBook(
+            @RequestParam(defaultValue = "Неизвестная книга") String title,
+            @RequestParam(defaultValue = "Неизвестный автор") String authorName) {
+
+        Author author = new Author(authorName);
+        Book book = new Book(title);
 
         book.getAuthors().add(author);
         bookRepository.save(book);
 
-        return "Книга '" + book.getTitle() + "' успешно добавлена!";
+        return "Книга '" + book.getTitle() + "' автора " + authorName + " успешно добавлена!";
     }
 
     @GetMapping("/library/all")

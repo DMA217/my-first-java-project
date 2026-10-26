@@ -7,7 +7,7 @@
         body { font-family: Arial, sans-serif; max-width: 650px; margin: 40px auto; padding: 20px; background-color: #f4f4f9; }
         h1, h2 { color: #333; text-align: center; }
         .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        input[type="text"] { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        input[type="text"] { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         .buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
         button { flex: 1 1 30%; padding: 10px; border: none; border-radius: 4px; background-color: #e52b50; color: white; cursor: pointer; font-size: 14px; }
         button:hover { background-color: #ae1e31; }
@@ -62,10 +62,13 @@
 
 <div class="card">
     <h2>Библиотека (База Данных)</h2>
-    <p class="desc">Работа со связью Many-to-Many (Авторы и Книги).</p>
+    <p class="desc">Добавление книги и автора в базу данных PostgreSQL.</p>
+
+    <input type="text" id="bookTitleInput" placeholder="Название книги (например, Война и мир)" />
+    <input type="text" id="authorNameInput" placeholder="Имя автора (например, Лев Толстой)" />
 
     <div class="buttons">
-        <button class="btn-lib" onclick="addBook()">Добавить книгу в БД</button>
+        <button class="btn-lib" onclick="addNewBook()">Добавить книгу</button>
         <button class="btn-lib" onclick="getAllBooks()">Показать все книги</button>
     </div>
 
@@ -73,151 +76,7 @@
     <div class="result-box" id="libraryResult">Здесь появится ответ...</div>
 </div>
 
-<script>
-    const inputField = document.getElementById('textInput');
-    const resultBox = document.getElementById('result');
-    const exceptionResultBox = document.getElementById('exceptionResult');
-    const apiInputField = document.getElementById('apiInput');
-    const apiResultBox = document.getElementById('apiResult');
-    const libraryResultBox = document.getElementById('libraryResult');
-
-    function removeVowels() {
-        const text = inputField.value;
-        fetch(`/remove-vowels?param=${encodeURIComponent(text)}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Ошибка 400: Введите текст!');
-                return response.text();
-            })
-            .then(data => {
-                resultBox.innerHTML = data;
-                resultBox.classList.remove('error');
-            })
-            .catch(error => {
-                resultBox.innerHTML = error.message;
-                resultBox.classList.add('error');
-            });
-    }
-
-    function countConsonants() {
-        const text = inputField.value;
-        fetch(`/count-consonants?param=${encodeURIComponent(text)}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Ошибка 400: Введите текст!');
-                return response.text();
-            })
-            .then(data => {
-                resultBox.innerHTML = `Количество согласных: <b>${data}</b>`;
-                resultBox.classList.remove('error');
-            })
-            .catch(error => {
-                resultBox.innerHTML = error.message;
-                resultBox.classList.add('error');
-            });
-    }
-
-    function letterMap() {
-        const text = inputField.value;
-        fetch(`/letter-map?param=${encodeURIComponent(text)}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Ошибка 400: Введите текст!');
-                return response.json();
-            })
-            .then(data => {
-                resultBox.innerHTML = JSON.stringify(data, null, 2);
-                resultBox.classList.remove('error');
-            })
-            .catch(error => {
-                resultBox.innerHTML = error.message;
-                resultBox.classList.add('error');
-            });
-    }
-
-    function handleExceptionFetch(url) {
-        fetch(url)
-            .then(async response => {
-                const text = await response.text();
-                if (!response.ok) {
-                    throw new Error(`Статус ${response.status}: ${text}`);
-                }
-                return text;
-            })
-            .then(data => {
-                exceptionResultBox.innerHTML = `Успех:\n${data}`;
-                exceptionResultBox.classList.remove('error');
-            })
-            .catch(error => {
-                exceptionResultBox.innerHTML = `Поймана ошибка:\n${error.message}`;
-                exceptionResultBox.classList.add('error');
-            });
-    }
-
-    function testCheckedException() { handleExceptionFetch('/exception/checked'); }
-    function testUncheckedException() { handleExceptionFetch('/exception/unchecked'); }
-    function testLogException() { handleExceptionFetch('/exception/log?text=TestFromHtml'); }
-
-    function apiHello() {
-        const name = apiInputField.value || "Гость";
-        fetch(`/api/hello?name=${encodeURIComponent(name)}`)
-            .then(response => response.text())
-            .then(data => {
-                apiResultBox.innerHTML = data;
-                apiResultBox.classList.remove('error');
-            })
-            .catch(error => {
-                apiResultBox.innerHTML = error.message;
-                apiResultBox.classList.add('error');
-            });
-    }
-
-    function apiReverse() {
-        const text = apiInputField.value;
-        if (!text) {
-            apiResultBox.innerHTML = "Введите текст для переворота!";
-            apiResultBox.classList.add('error');
-            return;
-        }
-        fetch(`/api/reverse?text=${encodeURIComponent(text)}`)
-            .then(response => response.text())
-            .then(data => {
-                apiResultBox.innerHTML = data;
-                apiResultBox.classList.remove('error');
-            })
-            .catch(error => {
-                apiResultBox.innerHTML = error.message;
-                apiResultBox.classList.add('error');
-            });
-    }
-
-    function addBook() {
-        fetch('/api/library/add')
-            .then(response => response.text())
-            .then(data => {
-                libraryResultBox.innerHTML = data;
-                libraryResultBox.classList.remove('error');
-            })
-            .catch(error => {
-                libraryResultBox.innerHTML = "Ошибка при добавлении: " + error.message;
-                libraryResultBox.classList.add('error');
-            });
-    }
-
-    function getAllBooks() {
-        fetch('/api/library/all')
-            .then(response => {
-                if (!response.ok) throw new Error("Ошибка при получении списка книг");
-                return response.json();
-            })
-            .then(data => {
-                // Красиво форматируем JSON
-                libraryResultBox.innerHTML = JSON.stringify(data, null, 2);
-                libraryResultBox.classList.remove('error');
-            })
-            .catch(error => {
-                libraryResultBox.innerHTML = error.message;
-                libraryResultBox.classList.add('error');
-            });
-    }
-</script>
+<script src="script.js"></script>
 
 </body>
 </html>
