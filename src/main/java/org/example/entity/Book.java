@@ -27,8 +27,8 @@ public class Book {
     private List<Author> authors = new ArrayList<>();
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "books")
-    private List<User> users = new ArrayList<>();
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserBook> userBooks = new ArrayList<>();
 
     public Book() {}
     public Book(String title) {

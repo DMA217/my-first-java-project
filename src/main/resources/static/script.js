@@ -7,6 +7,10 @@ const libraryResultBox = document.getElementById('libraryResult');
 
 const bookTitleInput = document.getElementById('bookTitleInput');
 const authorNameInput = document.getElementById('authorNameInput');
+const searchInput = document.getElementById('searchInput');
+const issueUserInput = document.getElementById('issueUserInput');
+const issueBookInput = document.getElementById('issueBookInput');
+const deleteBookId = document.getElementById('deleteBookId');
 
 function removeVowels() {
     const text = inputField.value;
@@ -113,7 +117,7 @@ function apiReverse() {
         });
 }
 
-function addNewBook() {
+function addNewBookPost() {
     const title = bookTitleInput.value;
     const authorName = authorNameInput.value;
 
@@ -123,16 +127,44 @@ function addNewBook() {
         return;
     }
 
-    fetch(`/api/library/add?title=${encodeURIComponent(title)}&authorName=${encodeURIComponent(authorName)}`)
-        .then(response => response.text())
+    fetch('/api/library/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: title, authorName: authorName })
+    })
+    .then(async response => {
+        const text = await response.text();
+        if (!response.ok) throw new Error(text);
+        return text;
+    })
+    .then(data => {
+        libraryResultBox.innerHTML = data;
+        libraryResultBox.classList.remove('error');
+        bookTitleInput.value = '';
+        authorNameInput.value = '';
+    })
+    .catch(error => {
+        libraryResultBox.innerHTML = "Ошибка: " + error.message;
+        libraryResultBox.classList.add('error');
+    });
+}
+
+function searchBooks() {
+    const query = searchInput.value;
+    if (!query) {
+        libraryResultBox.innerHTML = "Введите запрос для поиска!";
+        libraryResultBox.classList.add('error');
+        return;
+    }
+
+    fetch(`/api/library/search?query=${encodeURIComponent(query)}`)
+        .then(response => response.json())
         .then(data => {
-            libraryResultBox.innerHTML = data;
+            libraryResultBox.innerHTML = JSON.stringify(data, null, 2);
             libraryResultBox.classList.remove('error');
-            bookTitleInput.value = '';
-            authorNameInput.value = '';
         })
         .catch(error => {
-            libraryResultBox.innerHTML = "Ошибка при добавлении: " + error.message;
+            libraryResultBox.innerHTML = "Ошибка поиска: " + error.message;
             libraryResultBox.classList.add('error');
         });
 }
@@ -151,4 +183,62 @@ function getAllBooks() {
             libraryResultBox.innerHTML = error.message;
             libraryResultBox.classList.add('error');
         });
+}
+
+function issueBook() {
+    const userName = issueUserInput.value;
+    const bookTitle = issueBookInput.value;
+
+    if (!userName || !bookTitle) {
+        libraryResultBox.innerHTML = "Введите имя читателя и название книги!";
+        libraryResultBox.classList.add('error');
+        return;
+    }
+
+    fetch(`/api/library/issue?userName=${encodeURIComponent(userName)}&bookTitle=${encodeURIComponent(bookTitle)}`)
+        .then(response => response.text())
+        .then(data => {
+            libraryResultBox.innerHTML = data;
+            libraryResultBox.classList.remove('error');
+            issueUserInput.value = '';
+            issueBookInput.value = '';
+        })
+        .catch(error => {
+            libraryResultBox.innerHTML = "Ошибка выдачи: " + error.message;
+            libraryResultBox.classList.add('error');
+        });
+}
+
+function deleteBook() {
+    const id = deleteBookId.value;
+    if (!id) {
+        libraryResultBox.innerHTML = "Введите ID книги!";
+        libraryResultBox.classList.add('error');
+        return;
+    }
+
+    fetch(`/api/library/delete/${id}`, {
+        method: 'DELETE'
+    })
+    .then(async response => {
+        const text = await response.text();
+        if (!response.ok) {
+            try {
+                const err = JSON.parse(text);
+                throw new Error(err.error);
+            } catch (e) {
+                throw new Error(text);
+            }
+        }
+        return text;
+    })
+    .then(data => {
+        libraryResultBox.innerHTML = data;
+        libraryResultBox.classList.remove('error');
+        deleteBookId.value = '';
+    })
+    .catch(error => {
+        libraryResultBox.innerHTML = "Ошибка удаления: " + error.message;
+        libraryResultBox.classList.add('error');
+    });
 }

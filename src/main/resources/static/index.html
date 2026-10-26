@@ -7,7 +7,7 @@
         body { font-family: Arial, sans-serif; max-width: 650px; margin: 40px auto; padding: 20px; background-color: #f4f4f9; }
         h1, h2 { color: #333; text-align: center; }
         .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        input[type="text"] { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         .buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
         button { flex: 1 1 30%; padding: 10px; border: none; border-radius: 4px; background-color: #e52b50; color: white; cursor: pointer; font-size: 14px; }
         button:hover { background-color: #ae1e31; }
@@ -19,7 +19,7 @@
         .btn-lib:hover { background-color: #218838; }
         .result-box { background: #e9ecef; padding: 15px; border-radius: 4px; min-height: 50px; word-wrap: break-word; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
         .error { color: red; font-weight: bold; }
-        p.desc { text-align: center; color: #666; font-size: 14px; margin-bottom: 15px; }
+        p.desc { text-align: center; color: #666; font-size: 14px; margin-bottom: 10px; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -62,14 +62,32 @@
 
 <div class="card">
     <h2>Библиотека (База Данных)</h2>
-    <p class="desc">Добавление книги и автора в базу данных PostgreSQL.</p>
 
-    <input type="text" id="bookTitleInput" placeholder="Название книги (например, Война и мир)" />
-    <input type="text" id="authorNameInput" placeholder="Имя автора (например, Лев Толстой)" />
-
+    <p class="desc">Добавить новую книгу (POST-запрос):</p>
+    <input type="text" id="bookTitleInput" placeholder="Название книги..." />
+    <input type="text" id="authorNameInput" placeholder="Имя автора..." />
     <div class="buttons">
-        <button class="btn-lib" onclick="addNewBook()">Добавить книгу</button>
+        <button class="btn-lib" onclick="addNewBookPost()">Добавить книгу (POST)</button>
+    </div>
+
+    <p class="desc">Поиск книги по названию:</p>
+    <input type="text" id="searchInput" placeholder="Введите название для поиска..." />
+    <div class="buttons">
+        <button class="btn-lib" onclick="searchBooks()">Найти книгу</button>
         <button class="btn-lib" onclick="getAllBooks()">Показать все книги</button>
+    </div>
+
+    <p class="desc">Выдать книгу читателю:</p>
+    <input type="text" id="issueUserInput" placeholder="Имя читателя..." />
+    <input type="text" id="issueBookInput" placeholder="Название книги..." />
+    <div class="buttons">
+        <button class="btn-lib" onclick="issueBook()">Выдать книгу</button>
+    </div>
+
+    <p class="desc">Удалить книгу по ID:</p>
+    <input type="number" id="deleteBookId" placeholder="ID книги (например, 1)" />
+    <div class="buttons">
+        <button class="btn-exception" onclick="deleteBook()" style="background-color: #dc3545; flex: 1 1 100%;">Удалить книгу</button>
     </div>
 
     <div>Результат БД:</div>
