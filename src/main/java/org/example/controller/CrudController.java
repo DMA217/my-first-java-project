@@ -7,6 +7,7 @@ import org.example.repository.AuthorRepository;
 import org.example.repository.BookRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -81,5 +82,28 @@ public class CrudController {
                 .map(book -> new AuthorBookDto(book.getTitle(), book.getPages()))
                 .distinct()
                 .collect(Collectors.toList());
+    }
+
+    @GetMapping("/sorted-by-pages")
+    public List<Book> getBooksSortedByPages() {
+        return bookRepository.findAll().stream()
+                .sorted((b1, b2) -> b2.getPages().compareTo(b1.getPages()))
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/grouped-by-pages")
+    public Map<Integer, List<Book>> groupBooksByPages() {
+        return bookRepository.findAll().stream()
+                .filter(b -> b.getPages() != null)
+                .collect(Collectors.groupingBy(Book::getPages));
+    }
+
+    @GetMapping("/average-pages")
+    public double getAveragePages() {
+        return bookRepository.findAll().stream()
+                .filter(b -> b.getPages() != null)
+                .mapToInt(Book::getPages)
+                .average()
+                .orElse(0.0);
     }
 }
