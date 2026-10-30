@@ -2,19 +2,16 @@ package org.example.controller;
 
 import org.example.entity.Author;
 import org.example.entity.Book;
-import org.example.entity.BookResponse;
 import org.example.entity.User;
-import org.example.entity.UserBook;
 import org.example.exception.InvalidBookDataException;
 import org.example.repository.BookRepository;
-import org.example.repository.UserBookRepository;
 import org.example.repository.UserRepository;
 import org.example.service.ApiService;
 import org.springframework.web.bind.annotation.*;
+import org.example.entity.BookCreateRequest;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -23,16 +20,11 @@ public class ApiController {
     private final ApiService apiService;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
-    private final UserBookRepository userBookRepository;
 
-    public ApiController(ApiService apiService,
-                         BookRepository bookRepository,
-                         UserRepository userRepository,
-                         UserBookRepository userBookRepository) {
+    public ApiController(ApiService apiService, BookRepository bookRepository, UserRepository userRepository) {
         this.apiService = apiService;
         this.bookRepository = bookRepository;
         this.userRepository = userRepository;
-        this.userBookRepository = userBookRepository;
     }
 
     @GetMapping("/hello")
@@ -46,16 +38,22 @@ public class ApiController {
     }
 
     @PostMapping("/library/add")
-    public String addBookPost(@RequestBody Map<String, String> payload) {
-        String title = payload.get("title");
-        String authorName = payload.get("authorName");
+    public String addBookPost(@RequestBody BookCreateRequest request) {
+        String title = request.getTitle();
+        Integer pages = request.getPages() != null ? request.getPages() : 0;
 
-        if (title == null || title.trim().isEmpty() || authorName == null || authorName.trim().isEmpty()) {
+        String authorName = "Неизвестный автор";
+        if (request.getAuthors() != null && !request.getAuthors().isEmpty()) {
+            authorName = request.getAuthors().get(0).getName();
+        }
+
+        if (title == null || title.trim().isEmpty() || authorName.trim().isEmpty()) {
             throw new InvalidBookDataException("Название книги и автор обязательны!");
         }
 
         Author author = new Author(authorName);
         Book book = new Book(title);
+        book.setPages(pages);
 
         book.getAuthors().add(author);
         bookRepository.save(book);
@@ -64,36 +62,26 @@ public class ApiController {
     }
 
     @GetMapping("/library/all")
-    public List<BookResponse> getAllBooks() {
-        return bookRepository.findAll().stream()
-                .map(BookResponse::new)
-                .collect(Collectors.toList());
+    public List<Book> getAllBooks() {
+        return bookRepository.findAll();
     }
 
     @GetMapping("/library/issue")
     public String issueBook(@RequestParam String userName, @RequestParam String bookTitle) {
-        // 1. Ищем пользователя по имени, если нет - создаем нового
         User user = userRepository.findAll().stream()
                 .filter(u -> u.getName().equalsIgnoreCase(userName))
                 .findFirst()
                 .orElseGet(() -> userRepository.save(new User(userName)));
 
-        // 2. Ищем книгу по названию, если нет - создаем новую
         List<Book> foundBooks = bookRepository.findByTitleContainingIgnoreCase(bookTitle);
         Book book = foundBooks.isEmpty() ? bookRepository.save(new Book(bookTitle)) : foundBooks.get(0);
 
-        // 3. Создаем запись о выдаче (с автоматической датой)
-        UserBook userBook = new UserBook(user, book);
-        userBookRepository.save(userBook);
-
-        return "Книга '" + book.getTitle() + "' выдана пользователю " + userName + " (Дата выдачи: " + userBook.getIssueDate() + ")";
+        return "Книга '" + book.getTitle() + "' выдана пользователю " + userName;
     }
 
     @GetMapping("/library/search")
-    public List<BookResponse> searchBooks(@RequestParam String query) {
-        return bookRepository.findByTitleContainingIgnoreCase(query).stream()
-                .map(BookResponse::new)
-                .collect(Collectors.toList());
+    public List<Book> searchBooks(@RequestParam String query) {
+        return bookRepository.findByTitleContainingIgnoreCase(query);
     }
 
     @DeleteMapping("/library/delete/{id}")

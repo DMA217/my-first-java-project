@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
+import java.util.Map;
 
 @RestController
 public class MyController {
@@ -69,5 +70,10 @@ public class MyController {
     @GetMapping("/exception/log")
     public String triggerLog(@RequestParam(value = "text", defaultValue = "test") String text) {
         return exceptionService.logSample(text);
+    }
+
+    @GetMapping("/count-stream")
+    public Map<Character, Long> countStream(@RequestParam String text) {
+        return textService.countLettersWithStream(text);
     }
 }

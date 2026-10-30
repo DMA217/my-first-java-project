@@ -2,6 +2,7 @@ package org.example.service;
 
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -36,5 +37,21 @@ public class TextService {
             }
         }
         return counts;
+    }
+
+    public Map<Character, Long> countLettersWithStream(String input) {
+        Map<Character, Long> frequencyMap = new HashMap<>();
+
+        if (input == null || input.isEmpty()) {
+            return frequencyMap;
+        }
+
+        input.chars()
+                .mapToObj(c -> (char) c)
+                .filter(Character::isLetter)
+                .map(Character::toLowerCase)
+                .forEach(c -> frequencyMap.merge(c, 1L, Long::sum));
+
+        return frequencyMap;
     }
 }

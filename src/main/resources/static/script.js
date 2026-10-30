@@ -7,10 +7,15 @@ const libraryResultBox = document.getElementById('libraryResult');
 
 const bookTitleInput = document.getElementById('bookTitleInput');
 const authorNameInput = document.getElementById('authorNameInput');
+const bookPagesInput = document.getElementById('bookPagesInput');
 const searchInput = document.getElementById('searchInput');
 const issueUserInput = document.getElementById('issueUserInput');
 const issueBookInput = document.getElementById('issueBookInput');
 const deleteBookId = document.getElementById('deleteBookId');
+
+const pagesInput = document.getElementById('pagesInput');
+const authorSurnameInput = document.getElementById('authorSurnameInput');
+const searchResultBox = document.getElementById('searchResult');
 
 function removeVowels() {
     const text = inputField.value;
@@ -120,6 +125,7 @@ function apiReverse() {
 function addNewBookPost() {
     const title = bookTitleInput.value;
     const authorName = authorNameInput.value;
+    const pages = bookPagesInput.value;
 
     if (!title || !authorName) {
         libraryResultBox.innerHTML = "Пожалуйста, заполните название книги и автора!";
@@ -127,14 +133,22 @@ function addNewBookPost() {
         return;
     }
 
+    const payload = {
+        title: title,
+        pages: pages ? parseInt(pages) : 0,
+        authors: [ { name: authorName } ]
+    };
+
     fetch('/api/library/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: title, authorName: authorName })
+        body: JSON.stringify(payload)
     })
     .then(async response => {
         const text = await response.text();
-        if (!response.ok) throw new Error(text);
+        if (!response.ok) {
+            throw new Error(text || "Ошибка сервера");
+        }
         return text;
     })
     .then(data => {
@@ -142,6 +156,7 @@ function addNewBookPost() {
         libraryResultBox.classList.remove('error');
         bookTitleInput.value = '';
         authorNameInput.value = '';
+        bookPagesInput.value = '';
     })
     .catch(error => {
         libraryResultBox.innerHTML = "Ошибка: " + error.message;
@@ -241,4 +256,57 @@ function deleteBook() {
         libraryResultBox.innerHTML = "Ошибка удаления: " + error.message;
         libraryResultBox.classList.add('error');
     });
+}
+
+function getBooksOver100Pages() {
+    fetch('/crud/books/more-than-100-pages')
+        .then(response => response.json())
+        .then(data => {
+            searchResultBox.innerHTML = JSON.stringify(data, null, 2);
+            searchResultBox.classList.remove('error');
+        })
+        .catch(error => {
+            searchResultBox.innerHTML = "Ошибка: " + error.message;
+            searchResultBox.classList.add('error');
+        });
+}
+
+function getBooksOverXPages() {
+    const x = pagesInput.value;
+    if (!x) {
+        searchResultBox.innerHTML = "Введите количество страниц!";
+        searchResultBox.classList.add('error');
+        return;
+    }
+
+    fetch(`/crud/books/more-than-pages?x=${x}`)
+        .then(response => response.json())
+        .then(data => {
+            searchResultBox.innerHTML = JSON.stringify(data, null, 2);
+            searchResultBox.classList.remove('error');
+        })
+        .catch(error => {
+            searchResultBox.innerHTML = "Ошибка: " + error.message;
+            searchResultBox.classList.add('error');
+        });
+}
+
+function getBooksByAuthor() {
+    const surname = authorSurnameInput.value;
+    if (!surname) {
+        searchResultBox.innerHTML = "Введите фамилию автора!";
+        searchResultBox.classList.add('error');
+        return;
+    }
+
+    fetch(`/crud/books/by-author?surname=${encodeURIComponent(surname)}`)
+        .then(response => response.json())
+        .then(data => {
+            searchResultBox.innerHTML = JSON.stringify(data, null, 2);
+            searchResultBox.classList.remove('error');
+        })
+        .catch(error => {
+            searchResultBox.innerHTML = "Ошибка: " + error.message;
+            searchResultBox.classList.add('error');
+        });
 }

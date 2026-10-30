@@ -66,6 +66,7 @@
     <p class="desc">Добавить новую книгу (POST-запрос):</p>
     <input type="text" id="bookTitleInput" placeholder="Название книги..." />
     <input type="text" id="authorNameInput" placeholder="Имя автора..." />
+    <input type="number" id="bookPagesInput" placeholder="Количество страниц..." />
     <div class="buttons">
         <button class="btn-lib" onclick="addNewBookPost()">Добавить книгу (POST)</button>
     </div>
@@ -94,7 +95,31 @@
     <div class="result-box" id="libraryResult">Здесь появится ответ...</div>
 </div>
 
-<script src="script.js"></script>
+<div class="card">
+    <h2>Поиск и Фильтрация (Задания)</h2>
+
+    <p class="desc">Найти книги с более чем 100 страницами:</p>
+    <div class="buttons">
+        <button class="btn-api" onclick="getBooksOver100Pages()">Книги > 100 стр.</button>
+    </div>
+
+    <p class="desc">Найти книги с более чем X страницами:</p>
+    <input type="number" id="pagesInput" placeholder="Введите количество страниц (X)..." />
+    <div class="buttons">
+        <button class="btn-api" onclick="getBooksOverXPages()">Найти книги > X стр.</button>
+    </div>
+
+    <p class="desc">Найти книги по фамилии автора:</p>
+    <input type="text" id="authorSurnameInput" placeholder="Введите фамилию автора (например, Толстой)..." />
+    <div class="buttons">
+        <button class="btn-api" onclick="getBooksByAuthor()">Найти по автору</button>
+    </div>
+
+    <div>Результат поиска:</div>
+    <div class="result-box" id="searchResult">Здесь появится ответ...</div>
+</div>
+
+<script src="script.js?v=2"></script>
 
 </body>
 </html>

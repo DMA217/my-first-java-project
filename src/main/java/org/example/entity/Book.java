@@ -18,6 +18,9 @@ public class Book {
     @Column(nullable = false)
     private String title;
 
+    @Column(name = "pages")
+    private Integer pages;
+
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "book_author",
@@ -31,7 +34,13 @@ public class Book {
     private List<UserBook> userBooks = new ArrayList<>();
 
     public Book() {}
+
     public Book(String title) {
         this.title = title;
+    }
+
+    public Book(String title, Integer pages) {
+        this.title = title;
+        this.pages = pages;
     }
 }
