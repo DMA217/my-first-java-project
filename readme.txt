@@ -50,3 +50,6 @@ http://localhost:8080/letter-map?param=АБВ → Ответ: {"а":1,"б":1,"в
 URL: http://localhost:8080/remove-vowels?param= (пусто) или ?param= (пробелы)
 
 Ответ: Текст Ошибка: параметр 'param' не может быть пустым. и статус-код 400 (в браузере просто увидите текст, а в Postman — красную цифру 400).
+
+Зайти в папку cd ~/IdeaProjects/untitled1/frontend
+Запустить сервер npm run dev
