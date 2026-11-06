@@ -53,3 +53,4 @@ URL: http://localhost:8080/remove-vowels?param= (пусто) или ?param= (п�
 
 Зайти в папку cd ~/IdeaProjects/untitled1/frontend
 Запустить сервер npm run dev
+Выйти cd ~
