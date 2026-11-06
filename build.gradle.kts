@@ -16,6 +16,10 @@ repositories {
     mavenCentral()
 }
 
+springBoot {
+    mainClass.set("org.example.DemoApplication")
+}
+
 dependencies {
     implementation(platform("org.springframework.boot:spring-boot-dependencies:3.4.1"))
     implementation("org.springframework.boot:spring-boot-starter-web")

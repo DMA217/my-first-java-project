@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 
 import java.util.Scanner;
 
-@SpringBootApplication
+//@SpringBootApplication
 public class ConsoleApplication {
 
     public static void main(String[] args) {
