@@ -20,10 +20,14 @@ const searchX = ref('')
 const searchAuthor = ref('')
 const filterResult = ref('')
 
-const chatIp = ref('')
-const chatName = ref('')
+const chatIp = ref('localhost')
+const chatName = ref('Алиса')
 const chatText = ref('')
 const chatLog = ref([])
+
+const isAuthenticated = ref(false)
+const authLogin = ref('')
+const authPassword = ref('')
 
 const toasts = ref([])
 
@@ -33,6 +37,16 @@ const showToast = (message, type = 'success') => {
   setTimeout(() => {
     toasts.value = toasts.value.filter(t => t.id !== id)
   }, 3000)
+}
+
+const login = () => {
+  if (authLogin.value === 'admin' && authPassword.value === 'password') {
+    isAuthenticated.value = true
+    showToast('Вы вошли как администратор', 'success')
+    authPassword.value = ''
+  } else {
+    showToast('Неверный логин или пароль', 'error')
+  }
 }
 
 const fetchBooks = async () => {
@@ -165,6 +179,7 @@ const sendMessage = async () => {
     const result = await res.text()
     showToast(result, 'success')
     chatText.value = ''
+    await loadMessages()
   } catch (e) {
     showToast('Ошибка отправки: ' + e.message, 'error')
   }
@@ -176,6 +191,23 @@ const loadMessages = async () => {
     chatLog.value = await res.json()
   } catch (e) {
     showToast('Ошибка загрузки сообщений', 'error')
+  }
+}
+
+const clearChat = async () => {
+  if (!confirm('Вы уверены, что хотите очистить всю историю чата?')) return
+  try {
+    const res = await fetch('/api/chat/clear', {
+      method: 'DELETE',
+      headers: {
+        'Authorization': 'Basic ' + btoa('admin:password')
+      }
+    })
+    if (!res.ok) throw new Error('Ошибка очистки (проверьте пароль)')
+    showToast('История чата очищена!', 'success')
+    chatLog.value = []
+  } catch (e) {
+    showToast(e.message, 'error')
   }
 }
 
@@ -270,7 +302,7 @@ onMounted(() => {
         <div v-if="activeTab === 'chat'" class="card">
           <h2>Отправка сообщения</h2>
           <div class="form-group">
-            <input v-model="chatIp" placeholder="IP сервера (например, localhost)" />
+            <input v-model="chatIp" placeholder="IP сервера" />
             <input v-model="chatName" placeholder="Ваше имя" />
           </div>
           <div class="form-group">
@@ -278,7 +310,23 @@ onMounted(() => {
             <button @click="sendMessage" style="flex: 1;">Отправить</button>
           </div>
 
-          <h2 style="margin-top: 30px;">История сообщений</h2>
+          <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;" />
+
+          <div v-if="!isAuthenticated" class="auth-box">
+            <h3>Вход для администратора</h3>
+            <div class="form-group">
+              <input v-model="authLogin" placeholder="Логин" />
+              <input v-model="authPassword" type="password" placeholder="Пароль" />
+              <button @click="login" class="btn-dark">Войти</button>
+            </div>
+          </div>
+
+          <div v-if="isAuthenticated" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; background: #f0fdf4; padding: 10px; border-radius: 6px;">
+            <span style="color: #166534; font-weight: bold;">Режим администратора</span>
+            <button @click="clearChat" class="btn-delete">Очистить историю чата</button>
+          </div>
+
+          <h2 style="margin-top: 20px;">История сообщений</h2>
           <button @click="loadMessages" class="btn-dark" style="margin-bottom: 15px; width: 100%;">Обновить историю</button>
 
           <ul class="chat-list">
@@ -387,6 +435,16 @@ button:hover { opacity: 0.9; }
 .btn-success { background-color: #28a745; }
 .btn-delete { background-color: #dc3545; padding: 6px 12px; font-size: 12px; }
 .full-width { width: 100%; margin-bottom: 20px; }
+
+.auth-box {
+  background: #f8fafc;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
+}
+
+.auth-box h3 { margin-top: 0; font-size: 1rem; color: #333; margin-bottom: 10px; }
 
 .result-box {
   background: #e9ecef;

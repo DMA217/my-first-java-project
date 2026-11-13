@@ -40,4 +40,8 @@ public class ChatService {
     public List<Message> getMessagesFrom(String senderName) {
         return messageRepository.findBySenderName(senderName);
     }
+
+    public void clearAllMessages() {
+        messageRepository.deleteAll();
+    }
 }

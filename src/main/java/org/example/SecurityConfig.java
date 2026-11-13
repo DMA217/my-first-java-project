@@ -26,6 +26,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/hello", "/api/reverse").permitAll()
                         .requestMatchers("/api/library/add", "/api/library/delete/**").authenticated()
                         .requestMatchers("/crud/**").authenticated()
+                        .requestMatchers("/api/chat/clear").authenticated()
                         .anyRequest().permitAll()
                 )
                 .httpBasic(httpBasic -> {});

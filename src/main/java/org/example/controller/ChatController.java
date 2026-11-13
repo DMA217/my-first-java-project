@@ -41,4 +41,10 @@ public class ChatController {
     public List<Message> readAllMessagesFrom(@RequestParam String senderName) {
         return chatService.getMessagesFrom(senderName);
     }
+
+    @DeleteMapping("/clear")
+    public String clearAllMessages() {
+        chatService.clearAllMessages();
+        return "История чата очищена!";
+    }
 }
