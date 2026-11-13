@@ -14,6 +14,26 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
+      },
+      '/remove-vowels': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/count-consonants': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/letter-map': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/exception': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/crud': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
       }
     }
   }

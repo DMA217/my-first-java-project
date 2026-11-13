@@ -36,6 +36,7 @@ dependencies {
     implementation("io.github.kilmajster:ngrok-spring-boot-starter:0.9.2")
     implementation("org.liquibase:liquibase-core")
     runtimeOnly("org.postgresql:postgresql")
+    implementation("org.springframework.boot:spring-boot-starter-security")
 }
 
 tasks.test {
