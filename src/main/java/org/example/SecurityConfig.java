@@ -24,9 +24,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/library/all", "/api/library/search").permitAll()
                         .requestMatchers("/remove-vowels", "/count-consonants", "/letter-map").permitAll()
                         .requestMatchers("/api/hello", "/api/reverse").permitAll()
+                        .requestMatchers("/api/chat/all", "/api/chat/send").permitAll()
                         .requestMatchers("/api/library/add", "/api/library/delete/**").authenticated()
-                        .requestMatchers("/crud/**").authenticated()
                         .requestMatchers("/api/chat/clear").authenticated()
+                        .requestMatchers("/crud/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 .httpBasic(httpBasic -> {});

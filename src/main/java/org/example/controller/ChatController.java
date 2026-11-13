@@ -18,10 +18,7 @@ public class ChatController {
     }
 
     @GetMapping("/send")
-    public String sendMessage(
-            @RequestParam String ip,
-            @RequestParam String senderName,
-            @RequestParam String text) {
+    public String sendMessage(@RequestParam String ip, @RequestParam String senderName, @RequestParam String text) {
         chatService.sendMessageToRemote(ip, senderName, text);
         return "Сообщение отправлено на " + ip;
     }

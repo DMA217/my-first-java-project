@@ -20,8 +20,8 @@ const searchX = ref('')
 const searchAuthor = ref('')
 const filterResult = ref('')
 
-const chatIp = ref('localhost')
-const chatName = ref('Алиса')
+const chatIp = ref('')
+const chatName = ref('')
 const chatText = ref('')
 const chatLog = ref([])
 

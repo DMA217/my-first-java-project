@@ -24,7 +24,6 @@ public class ChatService {
         MessageDto dto = new MessageDto();
         dto.setSenderName(senderName);
         dto.setText(text);
-
         restTemplate.postForObject(url, dto, String.class);
     }
 

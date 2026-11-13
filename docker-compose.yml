@@ -34,16 +34,16 @@ services:
     depends_on:
       - app
 
-  ngrok:
-    image: ngrok/ngrok:latest
-    restart: unless-stopped
-    command:
-      - "http"
-      - "app:8080"
-    ports:
-      - "4040:4040"
-    environment:
-      NGROK_AUTHTOKEN: 20GkJfamObsyNdOmSAe42QJGdgs_33ZJJLtnVuUHiQqjMkMxH
+#  ngrok:
+#    image: ngrok/ngrok:latest
+#    restart: unless-stopped
+#    command:
+#      - "http"
+#      - "app:8080"
+#    ports:
+#      - "4040:4040"
+#    environment:
+#      NGROK_AUTHTOKEN: 20GkJfamObsyNdOmSAe42QJGdgs_33ZJJLtnVuUHiQqjMkMxH
 
 volumes:
   pgdata:
