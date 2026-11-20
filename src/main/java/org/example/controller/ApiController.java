@@ -9,6 +9,14 @@ import org.example.repository.UserRepository;
 import org.example.service.ApiService;
 import org.springframework.web.bind.annotation.*;
 import org.example.entity.BookCreateRequest;
+import org.example.mapper.ReflectionMapper;
+import org.example.mapper.X;
+import java.util.HashMap;
+import org.example.entity.MapperRequest;
+import org.example.mapper.ReflectionMapper;
+import org.example.mapper.X;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Map;
@@ -91,5 +99,23 @@ public class ApiController {
         }
         bookRepository.deleteById(id);
         return "Книга с ID " + id + " успешно удалена!";
+    }
+
+    @GetMapping("/test-mapper")
+    public String testMapper() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("name", "Иван");
+        data.put("age", 25);
+        data.put("weight", 75.5);
+        data.put("birthDate", "1999-05-15T10:30:00");
+
+        X obj = ReflectionMapper.mapToObject(data, X.class);
+        return obj.toString();
+    }
+
+    @PostMapping("/test-mapper")
+    public String testMapperPost(@RequestBody MapperRequest request) {
+        X obj = ReflectionMapper.mapToObject(request.getData(), X.class);
+        return obj.toString();
     }
 }

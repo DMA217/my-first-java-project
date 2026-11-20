@@ -1,5 +1,7 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { Client } from '@stomp/stompjs'
+import SockJS from 'sockjs-client/dist/sockjs.min.js'
 
 const activeTab = ref('text')
 
@@ -28,6 +30,14 @@ const chatLog = ref([])
 const isAuthenticated = ref(false)
 const authLogin = ref('')
 const authPassword = ref('')
+
+const mapperInput = ref('{\n  "name": "Иван",\n  "age": 25,\n  "weight": 75.5,\n  "birthDate": "1999-05-15T10:30:00"\n}')
+const mapperResult = ref('')
+
+const wsMessages = ref([])
+const wsInput = ref('')
+const wsConnected = ref(false)
+let stompClient = null
 
 const toasts = ref([])
 
@@ -211,9 +221,67 @@ const clearChat = async () => {
   }
 }
 
+const testMapper = async () => {
+  try {
+    const parsedData = JSON.parse(mapperInput.value)
+    const res = await fetch('/api/test-mapper', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: parsedData })
+    })
+    if (!res.ok) throw new Error(await res.text())
+    mapperResult.value = await res.text()
+  } catch (e) {
+    mapperResult.value = 'Ошибка: ' + e.message
+  }
+}
+
+const connectWebSocket = () => {
+  const socket = new SockJS('/ws')
+  stompClient = new Client({
+    webSocketFactory: () => socket,
+    reconnectDelay: 5000,
+    onConnect: () => {
+      wsConnected.value = true
+      stompClient.subscribe('/topic/chat', (msg) => {
+        const data = JSON.parse(msg.body)
+        wsMessages.value.push(data)
+      })
+    },
+    onStompError: (frame) => {
+      showToast('WebSocket ошибка: ' + frame.headers['message'], 'error')
+    }
+  })
+  stompClient.activate()
+}
+
+const sendWsMessage = () => {
+  if (!wsInput.value || !stompClient || !wsConnected.value) return
+  stompClient.publish({
+    destination: '/app/chat',
+    body: JSON.stringify({
+      sender: chatName.value,
+      text: wsInput.value
+    })
+  })
+  wsInput.value = ''
+}
+
+const disconnectWebSocket = () => {
+  if (stompClient) {
+    stompClient.deactivate()
+    wsConnected.value = false
+  }
+}
+
 onMounted(() => {
   fetchBooks()
   loadMessages()
+  connectWebSocket()
+})
+
+onUnmounted(() => {
+  disconnectWebSocket()
 })
 </script>
 
@@ -229,6 +297,7 @@ onMounted(() => {
           <button :class="{ active: activeTab === 'library' }" @click="activeTab = 'library'">Библиотека</button>
           <button :class="{ active: activeTab === 'search' }" @click="activeTab = 'search'">Поиск</button>
           <button :class="{ active: activeTab === 'chat' }" @click="activeTab = 'chat'">Чат</button>
+          <button :class="{ active: activeTab === 'mapper' }" @click="activeTab = 'mapper'">Маппер</button>
         </div>
       </header>
 
@@ -326,7 +395,7 @@ onMounted(() => {
             <button @click="clearChat" class="btn-delete">Очистить историю чата</button>
           </div>
 
-          <h2 style="margin-top: 20px;">История сообщений</h2>
+          <h2 style="margin-top: 20px;">История сообщений (REST)</h2>
           <button @click="loadMessages" class="btn-dark" style="margin-bottom: 15px; width: 100%;">Обновить историю</button>
 
           <ul class="chat-list">
@@ -335,6 +404,41 @@ onMounted(() => {
               <span class="chat-time">{{ new Date(msg.timestamp).toLocaleString() }}</span>
             </li>
           </ul>
+
+          <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;" />
+
+          <div style="margin-bottom: 20px; padding: 15px; background: #f0fdf4; border-radius: 8px; border: 1px solid #86efac;">
+            <h3 style="margin-top: 0; color: #166534;">WebSocket Чат (реальное время)</h3>
+            <p style="font-size: 12px; color: #666;">Статус: {{ wsConnected ? '✅ Подключено' : '❌ Отключено' }}</p>
+
+            <div class="form-group">
+              <input v-model="wsInput" placeholder="Сообщение через WebSocket..." style="flex: 3;" @keyup.enter="sendWsMessage" />
+              <button @click="sendWsMessage" :disabled="!wsConnected" style="flex: 1; background: #16a34a;">Отправить WS</button>
+            </div>
+
+            <ul class="chat-list" style="max-height: 150px; overflow-y: auto; background: white; border-radius: 6px; padding: 10px;">
+              <li v-for="(msg, idx) in wsMessages" :key="idx" style="padding: 5px; border-bottom: 1px solid #eee;">
+                <strong>{{ msg.sender }}</strong>: {{ msg.text }}
+                <span class="chat-time">{{ msg.timestamp }}</span>
+              </li>
+              <li v-if="wsMessages.length === 0" style="text-align: center; color: #999; padding: 10px;">Нет сообщений</li>
+            </ul>
+          </div>
+        </div>
+
+        <div v-if="activeTab === 'mapper'" class="card">
+          <h2>Рефлексия: Map to Object</h2>
+          <p style="font-size: 14px; color: #666; margin-bottom: 10px;">
+            Введите JSON, ключи которого совпадают с полями класса X (name, age, weight, birthDate).
+          </p>
+          <textarea
+            v-model="mapperInput"
+            rows="8"
+            style="width: 100%; font-family: monospace; padding: 10px; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 15px; box-sizing: border-box;"
+          ></textarea>
+          <button @click="testMapper" class="btn-dark full-width">Заполнить объект (Reflection)</button>
+
+          <div class="result-box">{{ mapperResult || 'Результат...' }}</div>
         </div>
 
       </div>
@@ -430,6 +534,7 @@ button {
   transition: 0.2s;
 }
 button:hover { opacity: 0.9; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .btn-dark { background-color: #333; }
 .btn-success { background-color: #28a745; }

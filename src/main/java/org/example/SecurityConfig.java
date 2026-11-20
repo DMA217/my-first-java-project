@@ -17,10 +17,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors.disable())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
                         .requestMatchers("/", "/assets/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/api/library/all", "/api/library/search").permitAll()
                         .requestMatchers("/remove-vowels", "/count-consonants", "/letter-map").permitAll()
                         .requestMatchers("/api/hello", "/api/reverse").permitAll()
