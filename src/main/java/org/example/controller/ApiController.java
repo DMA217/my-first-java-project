@@ -17,6 +17,11 @@ import org.example.mapper.ReflectionMapper;
 import org.example.mapper.X;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.example.service.RaceConditionService;
+import org.example.service.ProducerConsumerService;
+import org.example.service.DeadlockService;
+import org.example.service.ExecutorServiceExample;
 
 import java.util.List;
 import java.util.Map;
@@ -117,5 +122,46 @@ public class ApiController {
     public String testMapperPost(@RequestBody MapperRequest request) {
         X obj = ReflectionMapper.mapToObject(request.getData(), X.class);
         return obj.toString();
+    }
+
+    @Autowired
+    private RaceConditionService raceConditionService;
+
+    @GetMapping("/race-condition")
+    public String testRaceCondition() throws InterruptedException {
+        int broken = raceConditionService.runRaceCondition();
+        int fixed = raceConditionService.runRaceConditionFixed();
+        return String.format("Без синхронизации: %d (ожидалось 10000)\nС синхронизацией: %d", broken, fixed);
+    }
+
+    @Autowired
+    private ProducerConsumerService producerConsumerService;
+
+    @GetMapping("/producer-consumer")
+    public String testProducerConsumer() throws InterruptedException {
+        producerConsumerService.runProducerConsumer();
+        return "Готово! Смотри консоль IntelliJ IDEA.";
+    }
+
+    @Autowired
+    private DeadlockService deadlockService;
+
+    @GetMapping("/deadlock")
+    public String testDeadlock() {
+        deadlockService.runDeadlock();
+        return "Deadlock запущен. Смотри консоль (программа зависнет).";
+    }
+
+    @Autowired
+    private ExecutorServiceExample executorServiceExample;
+
+    @GetMapping("/sum-executor")
+    public String testExecutor() {
+        try {
+            long sum = executorServiceExample.calculateSum();
+            return "Сумма чисел от 1 до 1000: " + sum;
+        } catch (Exception e) {
+            return "Ошибка: " + e.getMessage();
+        }
     }
 }
